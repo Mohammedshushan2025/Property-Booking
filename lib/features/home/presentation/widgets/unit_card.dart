@@ -127,7 +127,7 @@ class UnitCard extends StatelessWidget {
             ),
             SizedBox(height: 16.h),
             _buildDetailRow(
-              '${localizations.customerNameLabel}:',
+              '${localizations.description}:',
               unit.unitNameA ?? '-',
             ),
             SizedBox(height: 16.h),
