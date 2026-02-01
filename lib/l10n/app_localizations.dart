@@ -311,13 +311,13 @@ abstract class AppLocalizations {
   /// No description provided for @installment.
   ///
   /// In en, this message translates to:
-  /// **'Installment'**
+  /// **'Installment \'EGP\''**
   String get installment;
 
   /// No description provided for @totalPrice.
   ///
   /// In en, this message translates to:
-  /// **'Total Price'**
+  /// **'Total Price \'EGP\''**
   String get totalPrice;
 
   /// No description provided for @levelNo.
@@ -329,7 +329,7 @@ abstract class AppLocalizations {
   /// No description provided for @flatNo.
   ///
   /// In en, this message translates to:
-  /// **'Flat No'**
+  /// **'Unit No'**
   String get flatNo;
 
   /// No description provided for @unitStatus.
@@ -341,7 +341,7 @@ abstract class AppLocalizations {
   /// No description provided for @meterPrice.
   ///
   /// In en, this message translates to:
-  /// **'Meter Price'**
+  /// **'Meter Price \'EGP\''**
   String get meterPrice;
 
   /// No description provided for @notes.
@@ -395,7 +395,7 @@ abstract class AppLocalizations {
   /// No description provided for @unitArea.
   ///
   /// In en, this message translates to:
-  /// **'Unit Area'**
+  /// **'Unit Area \'meter\''**
   String get unitArea;
 
   /// No description provided for @fullDescription.
@@ -467,7 +467,7 @@ abstract class AppLocalizations {
   /// No description provided for @totalPriceAuto.
   ///
   /// In en, this message translates to:
-  /// **'Total Price (Auto)'**
+  /// **'Total Price EGP'**
   String get totalPriceAuto;
 
   /// No description provided for @userInput.
@@ -479,7 +479,7 @@ abstract class AppLocalizations {
   /// No description provided for @payValue.
   ///
   /// In en, this message translates to:
-  /// **'Pay Value'**
+  /// **'Pay Value \'EGP\''**
   String get payValue;
 
   /// No description provided for @dueDate.

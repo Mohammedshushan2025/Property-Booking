@@ -114,22 +114,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get modelName => 'Model Name';
 
   @override
-  String get installment => 'Installment';
+  String get installment => 'Installment \'EGP\'';
 
   @override
-  String get totalPrice => 'Total Price';
+  String get totalPrice => 'Total Price \'EGP\'';
 
   @override
   String get levelNo => 'Level No';
 
   @override
-  String get flatNo => 'Flat No';
+  String get flatNo => 'Unit No';
 
   @override
   String get unitStatus => 'Unit Status';
 
   @override
-  String get meterPrice => 'Meter Price';
+  String get meterPrice => 'Meter Price \'EGP\'';
 
   @override
   String get notes => 'Notes';
@@ -156,7 +156,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sold => 'Sold';
 
   @override
-  String get unitArea => 'Unit Area';
+  String get unitArea => 'Unit Area \'meter\'';
 
   @override
   String get fullDescription => 'Full Description';
@@ -192,13 +192,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterName => 'Enter Name';
 
   @override
-  String get totalPriceAuto => 'Total Price (Auto)';
+  String get totalPriceAuto => 'Total Price EGP';
 
   @override
   String get userInput => 'User Input';
 
   @override
-  String get payValue => 'Pay Value';
+  String get payValue => 'Pay Value \'EGP\'';
 
   @override
   String get dueDate => 'Due Date';

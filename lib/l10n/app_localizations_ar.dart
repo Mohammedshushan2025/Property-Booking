@@ -114,22 +114,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get modelName => 'اسم النموذج :';
 
   @override
-  String get installment => 'القسط :';
+  String get installment => 'القسط بالجنية:';
 
   @override
-  String get totalPrice => 'اجمالي السعر :';
+  String get totalPrice => 'اجمالي السعر بالجنية:';
 
   @override
   String get levelNo => 'الدور :';
 
   @override
-  String get flatNo => 'رقم الشقة :';
+  String get flatNo => 'رقم الوحدة :';
 
   @override
   String get unitStatus => 'حالة الوحدة :';
 
   @override
-  String get meterPrice => 'سعر المتر :';
+  String get meterPrice => 'سعر المتر بالجنية :';
 
   @override
   String get notes => 'ملاحظات :';
@@ -156,10 +156,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sold => 'مباعة';
 
   @override
-  String get unitArea => 'المساحة :';
+  String get unitArea => 'المساحة \'متر\' :';
 
   @override
-  String get fullDescription => 'قيمة الوصف الكامل :';
+  String get fullDescription => 'الوصف:';
 
   @override
   String get logout => 'تسجيل الخروج';
@@ -192,13 +192,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get enterName => 'ادخل الاسم';
 
   @override
-  String get totalPriceAuto => 'اجمالي السعر (تلقائي)';
+  String get totalPriceAuto => 'اجمالي السعر بالجنية';
 
   @override
   String get userInput => 'مدخلات العميل';
 
   @override
-  String get payValue => 'قيمة الدفعة';
+  String get payValue => 'قيمة الدفعة بالجنية';
 
   @override
   String get dueDate => 'تاريخ الاستحقاق';
