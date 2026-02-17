@@ -79,5 +79,14 @@
     "success": "نجاح",
     "error": "خطأ",
     "fillAllFields": "املأ جميع البيانات",
-    "fieldRequired": "هذا الحقل مطلوب"
+    "fieldRequired": "هذا الحقل مطلوب",
+    "mobileNumber": "رقم الموبايل",
+    "nationalId": "الرقم القومي",
+    "paymentType": "طريقة الدفع",
+    "installmentPayment": "تقسيط",
+    "cashPayment": "كاش",
+    "semiCashPayment": "سيمي كاش",
+    "enterMobileNumber": "ادخل رقم الموبايل",
+    "enterNationalId": "ادخل الرقم القومي",
+    "selectPaymentType": "اختر طريقة الدفع"
 }

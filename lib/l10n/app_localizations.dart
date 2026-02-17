@@ -577,6 +577,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This field is required'**
   String get fieldRequired;
+
+  /// No description provided for @mobileNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile Number'**
+  String get mobileNumber;
+
+  /// No description provided for @nationalId.
+  ///
+  /// In en, this message translates to:
+  /// **'National ID'**
+  String get nationalId;
+
+  /// No description provided for @paymentType.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Type'**
+  String get paymentType;
+
+  /// No description provided for @installmentPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Installment'**
+  String get installmentPayment;
+
+  /// No description provided for @cashPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get cashPayment;
+
+  /// No description provided for @semiCashPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Semi-Cash'**
+  String get semiCashPayment;
+
+  /// No description provided for @enterMobileNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter mobile number'**
+  String get enterMobileNumber;
+
+  /// No description provided for @enterNationalId.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter national ID'**
+  String get enterNationalId;
+
+  /// No description provided for @selectPaymentType.
+  ///
+  /// In en, this message translates to:
+  /// **'Select payment type'**
+  String get selectPaymentType;
 }
 
 class _AppLocalizationsDelegate

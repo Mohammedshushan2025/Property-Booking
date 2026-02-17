@@ -10,15 +10,20 @@ class ReservationFormProvider with ChangeNotifier {
   final TextEditingController unitAreaController = TextEditingController();
   final TextEditingController totalPriceController = TextEditingController();
   final TextEditingController paymentValueController = TextEditingController();
+  final TextEditingController mobileNumberController = TextEditingController();
+  final TextEditingController nationalIdController = TextEditingController();
 
   // Error states
   String? descriptionError;
   String? meterPriceError;
   String? unitAreaError;
   String? paymentValueError;
+  String? mobileNumberError;
+  String? nationalIdError;
 
   // Selected values
   String? selectedUser;
+  String? selectedPaymentType;
   DateTime reservationDate = DateTime.now();
   DateTime contractDate = DateTime.now();
   DateTime dueDate = DateTime.now();
@@ -33,6 +38,8 @@ class ReservationFormProvider with ChangeNotifier {
     meterPriceController.addListener(calculateTotal);
     unitAreaController.addListener(calculateTotal);
     paymentValueController.addListener(notifyListeners);
+    mobileNumberController.addListener(notifyListeners);
+    nationalIdController.addListener(notifyListeners);
   }
 
   void init(UnitModel unit) {
@@ -56,7 +63,10 @@ class ReservationFormProvider with ChangeNotifier {
     customerNameController.clear();
     descriptionController.clear();
     paymentValueController.clear();
+    mobileNumberController.clear();
+    nationalIdController.clear();
     selectedUser = null;
+    selectedPaymentType = null;
     reservationDate = DateTime.now();
     contractDate = DateTime.now();
     dueDate = DateTime.now();
@@ -66,6 +76,8 @@ class ReservationFormProvider with ChangeNotifier {
     meterPriceError = null;
     unitAreaError = null;
     paymentValueError = null;
+    mobileNumberError = null;
+    nationalIdError = null;
 
     notifyListeners();
   }
@@ -74,7 +86,10 @@ class ReservationFormProvider with ChangeNotifier {
     customerNameController.clear();
     descriptionController.clear();
     paymentValueController.clear();
+    mobileNumberController.clear();
+    nationalIdController.clear();
     selectedUser = null;
+    selectedPaymentType = null;
     reservationDate = DateTime.now();
     contractDate = DateTime.now();
     dueDate = DateTime.now();
@@ -82,6 +97,8 @@ class ReservationFormProvider with ChangeNotifier {
     meterPriceError = null;
     unitAreaError = null;
     paymentValueError = null;
+    mobileNumberError = null;
+    nationalIdError = null;
     notifyListeners();
   }
 
@@ -105,6 +122,11 @@ class ReservationFormProvider with ChangeNotifier {
 
   void setSelectedUser(String? user) {
     selectedUser = user;
+    notifyListeners();
+  }
+
+  void setSelectedPaymentType(String? type) {
+    selectedPaymentType = type;
     notifyListeners();
   }
 
@@ -137,6 +159,12 @@ class ReservationFormProvider with ChangeNotifier {
       case 'paymentValue':
         paymentValueError = error;
         break;
+      case 'mobileNumber':
+        mobileNumberError = error;
+        break;
+      case 'nationalId':
+        nationalIdError = error;
+        break;
     }
     notifyListeners();
   }
@@ -154,6 +182,8 @@ class ReservationFormProvider with ChangeNotifier {
     unitAreaController.dispose();
     totalPriceController.dispose();
     paymentValueController.dispose();
+    mobileNumberController.dispose();
+    nationalIdController.dispose();
     super.dispose();
   }
 }

@@ -247,4 +247,31 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get fieldRequired => 'هذا الحقل مطلوب';
+
+  @override
+  String get mobileNumber => 'رقم الموبايل';
+
+  @override
+  String get nationalId => 'الرقم القومي';
+
+  @override
+  String get paymentType => 'طريقة الدفع';
+
+  @override
+  String get installmentPayment => 'تقسيط';
+
+  @override
+  String get cashPayment => 'كاش';
+
+  @override
+  String get semiCashPayment => 'سيمي كاش';
+
+  @override
+  String get enterMobileNumber => 'ادخل رقم الموبايل';
+
+  @override
+  String get enterNationalId => 'ادخل الرقم القومي';
+
+  @override
+  String get selectPaymentType => 'اختر طريقة الدفع';
 }

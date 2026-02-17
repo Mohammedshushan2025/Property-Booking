@@ -333,6 +333,9 @@ class HomeDatasource {
     required num totalPrice,
     required num paymentValue,
     required String dueDate,
+    required String mobileNo,
+    required String nationalId,
+    required int paymentType,
   }) async {
     final Map<String, dynamic> data = {
       "trns_type_code": 103,
@@ -340,7 +343,7 @@ class HomeDatasource {
       "customer_code": selectedUser,
       "Customer_Desc": customerName,
       "cntrct_type": 1,
-      "pay_type": 1,
+      "pay_type": paymentType,
       "rsrv_date": reservationDate,
       "cntrct_date": contractDate,
       "building_code": buildingCode,
@@ -355,6 +358,8 @@ class HomeDatasource {
       "desc_a": description.isEmpty ? "دفعة حجز" : description,
       "notes": "حجز وحدة استثمار عقاري",
       "user_code": salesCode,
+      "mobile_no": mobileNo,
+      "ntnl_id": nationalId,
     };
 
     log('--- Reservation Request ---', name: 'HomeDatasource');

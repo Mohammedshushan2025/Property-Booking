@@ -45,6 +45,8 @@ class _ReservationFormBottomSheetState
   final FocusNode _meterPriceFocus = FocusNode();
   final FocusNode _unitAreaFocus = FocusNode();
   final FocusNode _paymentValueFocus = FocusNode();
+  final FocusNode _mobileNumberFocus = FocusNode();
+  final FocusNode _nationalIdFocus = FocusNode();
 
   late CustomerProvider _customerProvider;
   late ReservationFormProvider _reservationFormProvider;
@@ -126,6 +128,20 @@ class _ReservationFormBottomSheetState
         'paymentValue',
       ),
     );
+    _mobileNumberFocus.addListener(
+      () => _validateFocusLoss(
+        _mobileNumberFocus,
+        provider.mobileNumberController,
+        'mobileNumber',
+      ),
+    );
+    _nationalIdFocus.addListener(
+      () => _validateFocusLoss(
+        _nationalIdFocus,
+        provider.nationalIdController,
+        'nationalId',
+      ),
+    );
   }
 
   @override
@@ -138,6 +154,8 @@ class _ReservationFormBottomSheetState
     _meterPriceFocus.dispose();
     _unitAreaFocus.dispose();
     _paymentValueFocus.dispose();
+    _mobileNumberFocus.dispose();
+    _nationalIdFocus.dispose();
     super.dispose();
   }
 
@@ -148,7 +166,7 @@ class _ReservationFormBottomSheetState
   ) {
     if (!focusNode.hasFocus && mounted) {
       final provider = context.read<ReservationFormProvider>();
-      if (controller.text.trim().isEmpty && field != 'description') {
+      if (controller.text.trim().isEmpty) {
         provider.setError(field, AppLocalizations.of(context)!.fieldRequired);
       } else {
         provider.setError(field, null);
@@ -165,7 +183,11 @@ class _ReservationFormBottomSheetState
         provider.meterPriceController.text.trim().isNotEmpty &&
         provider.unitAreaController.text.trim().isNotEmpty &&
         provider.paymentValueController.text.trim().isNotEmpty &&
-        provider.totalPriceController.text.trim().isNotEmpty;
+        provider.totalPriceController.text.trim().isNotEmpty &&
+        provider.descriptionController.text.trim().isNotEmpty &&
+        provider.mobileNumberController.text.trim().isNotEmpty &&
+        provider.nationalIdController.text.trim().isNotEmpty &&
+        provider.selectedPaymentType != null;
   }
 
   double _parseFormatted(String text) {
@@ -189,6 +211,18 @@ class _ReservationFormBottomSheetState
       final authState = context.read<AuthCubitCubit>().state;
       final salesCode = authState.userModel?.items?.firstOrNull?.usersCode ?? 0;
 
+      // Convert payment type to integer
+      int paymentTypeValue = 1; // Default to installment
+      final localizations = AppLocalizations.of(context)!;
+      if (provider.selectedPaymentType == localizations.installmentPayment) {
+        paymentTypeValue = 1;
+      } else if (provider.selectedPaymentType == localizations.cashPayment) {
+        paymentTypeValue = 2;
+      } else if (provider.selectedPaymentType ==
+          localizations.semiCashPayment) {
+        paymentTypeValue = 3;
+      }
+
       final response = await widget.homeDatasource.reserveUnit(
         salesCode: salesCode,
         buildingCode: widget.unit.buildingCode ?? 0,
@@ -203,6 +237,9 @@ class _ReservationFormBottomSheetState
         totalPrice: _parseFormatted(provider.totalPriceController.text),
         paymentValue: _parseFormatted(provider.paymentValueController.text),
         dueDate: _dateFormatter.format(provider.dueDate),
+        mobileNo: provider.mobileNumberController.text,
+        nationalId: provider.nationalIdController.text,
+        paymentType: paymentTypeValue,
       );
 
       if (mounted) {
@@ -504,6 +541,30 @@ class _ReservationFormBottomSheetState
                             hint: localizations.enterName,
                           ),
                           SizedBox(height: 16.h),
+                          UnitDetailLabel(
+                            label: localizations.mobileNumber,
+                            isRequired: true,
+                          ),
+                          UnitDetailTextField(
+                            controller: provider.mobileNumberController,
+                            hint: localizations.enterMobileNumber,
+                            isNumber: true,
+                            errorText: provider.mobileNumberError,
+                            focusNode: _mobileNumberFocus,
+                          ),
+                          SizedBox(height: 16.h),
+                          UnitDetailLabel(
+                            label: localizations.nationalId,
+                            isRequired: true,
+                          ),
+                          UnitDetailTextField(
+                            controller: provider.nationalIdController,
+                            hint: localizations.enterNationalId,
+                            isNumber: true,
+                            errorText: provider.nationalIdError,
+                            focusNode: _nationalIdFocus,
+                          ),
+                          SizedBox(height: 16.h),
                           Row(
                             children: [
                               Expanded(
@@ -541,7 +602,7 @@ class _ReservationFormBottomSheetState
                           SizedBox(height: 16.h),
                           UnitDetailLabel(
                             label: localizations.description,
-                            isRequired: false,
+                            isRequired: true,
                           ),
                           UnitDetailTextField(
                             controller: provider.descriptionController,
@@ -620,6 +681,74 @@ class _ReservationFormBottomSheetState
                             enabled: false,
                             suffix: isArabic ? "ج.م" : "EGP",
                             color: ColorManager.availableColor,
+                          ),
+                          SizedBox(height: 16.h),
+                          UnitDetailLabel(
+                            label: localizations.paymentType,
+                            isRequired: true,
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: ColorManager.white.withValues(alpha: 0.05),
+                              borderRadius: BorderRadius.circular(12.r),
+                              border: Border.all(
+                                color: ColorManager.white.withValues(
+                                  alpha: 0.1,
+                                ),
+                                width: 1.w,
+                              ),
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: provider.selectedPaymentType,
+                                hint: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 12.w,
+                                  ),
+                                  child: Text(
+                                    localizations.selectPaymentType,
+                                    style: TextStyle(
+                                      color: ColorManager.white.withValues(
+                                        alpha: 0.5,
+                                      ),
+                                      fontSize: 14.sp,
+                                    ),
+                                  ),
+                                ),
+                                isExpanded: true,
+                                dropdownColor: ColorManager.black,
+                                icon: Padding(
+                                  padding: EdgeInsets.only(right: 12.w),
+                                  child: Icon(
+                                    Icons.arrow_drop_down,
+                                    color: ColorManager.availableColor,
+                                  ),
+                                ),
+                                items:
+                                    [
+                                      localizations.installmentPayment,
+                                      localizations.cashPayment,
+                                      localizations.semiCashPayment,
+                                    ].map((String value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 12.w,
+                                          ),
+                                          child: Text(
+                                            value,
+                                            style: TextStyle(
+                                              color: ColorManager.white,
+                                              fontSize: 14.sp,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                onChanged: provider.setSelectedPaymentType,
+                              ),
+                            ),
                           ),
                           Divider(
                             color: ColorManager.white.withValues(alpha: 0.2),

@@ -247,4 +247,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fieldRequired => 'This field is required';
+
+  @override
+  String get mobileNumber => 'Mobile Number';
+
+  @override
+  String get nationalId => 'National ID';
+
+  @override
+  String get paymentType => 'Payment Type';
+
+  @override
+  String get installmentPayment => 'Installment';
+
+  @override
+  String get cashPayment => 'Cash';
+
+  @override
+  String get semiCashPayment => 'Semi-Cash';
+
+  @override
+  String get enterMobileNumber => 'Enter mobile number';
+
+  @override
+  String get enterNationalId => 'Enter national ID';
+
+  @override
+  String get selectPaymentType => 'Select payment type';
 }
