@@ -67,6 +67,7 @@ class _ModelSectionState extends State<ModelSection> {
                   child: widget.photos.isNotEmpty
                       ? CustomNetworkImage(
                           image: widget.photos.first.photoURL ?? '',
+                          placeHolder: ImageManager.splashImage,
                           fit: BoxFit.cover,
                           width: double.infinity,
                           height: double.infinity,

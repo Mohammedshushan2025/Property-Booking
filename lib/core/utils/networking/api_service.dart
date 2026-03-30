@@ -27,7 +27,7 @@ class ApiService {
         endPoint,
         data: data,
         options: Options(
-          responseType: ResponseType.plain, // Fetch as string to avoid FormatException
+          responseType: ResponseType.plain, 
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
