@@ -1,6 +1,6 @@
 class ApiConstants {
   static const String PropertyBookingUrl =
-      // 'http://41.38.186.147:7003/ords/arab_inverstors/Ascon_Inv/' live;
+      // 'http://41.38.186.147:7003/ords/arab_inverstors/Ascon_Inv/' ;//live
   'http://49.12.83.111:7003/ords/arab_inverstors/Ascon_Inv/' ; //test
 
   static const String getUser = 'emp_info/';

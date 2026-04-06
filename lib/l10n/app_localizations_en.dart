@@ -274,4 +274,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectPaymentType => 'Select payment type';
+
+  @override
+  String get search => 'Search...';
 }

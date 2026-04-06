@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -25,8 +26,12 @@ class BuildingView extends StatefulWidget {
 class _BuildingViewState extends State<BuildingView> {
   late Future<List<UnitModel>> _unitsFuture;
   late Future<List<BuildingPhotoModel>> _photosFuture;
+  late Future<List<dynamic>> _combinedFuture;
   late HomeDatasource _homeDatasource;
   int? _selectedStatus; // null = all, 0 = available, 1 = reserved, 3 = sold
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -38,6 +43,24 @@ class _BuildingViewState extends State<BuildingView> {
     _photosFuture = _homeDatasource.getAllPhotosByBuilding(
       widget.building.buildingCode!,
     );
+    _combinedFuture = Future.wait([_unitsFuture, _photosFuture]);
+    _searchController.addListener(() {
+      if (_debounce?.isActive ?? false) _debounce!.cancel();
+      _debounce = Timer(const Duration(milliseconds: 400), () {
+        if (mounted) {
+          setState(() {
+            _searchQuery = _searchController.text;
+          });
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _debounce?.cancel();
+    super.dispose();
   }
 
   @override
@@ -97,246 +120,403 @@ class _BuildingViewState extends State<BuildingView> {
           // Main content
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-            child: FutureBuilder<List<dynamic>>(
-              future: Future.wait([_unitsFuture, _photosFuture]),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return _buildSkeletonBody();
-                }
-
-                if (snapshot.hasError) {
-                  log(snapshot.error.toString(), name: "BuildingView Error");
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 60.sp,
-                          color: ColorManager.soldColor,
-                        ),
-                        SizedBox(height: 16.h),
-                        Text(
-                          localizations.errorLoadingUnits,
-                          style: TextStyle(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w600,
-                            color: ColorManager.white,
-                          ),
-                        ),
-                        SizedBox(height: 8.h),
-                        Text(
-                          localizations.tryAgain,
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            color: ColorManager.white.withValues(alpha: 0.7),
-                          ),
-                        ),
-                        SizedBox(height: 24.h),
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              _unitsFuture = _homeDatasource.getUnitsByBuilding(
-                                widget.building.buildingCode!,
-                              );
-                            });
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: ColorManager.availableColor,
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 32.w,
-                              vertical: 12.h,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.r),
-                            ),
-                          ),
-                          child: Text(
-                            localizations.retry,
-                            style: TextStyle(
-                              color: ColorManager.white,
-                              fontSize: 14.sp,
-                            ),
-                          ),
-                        ),
-                      ],
+            child: Column(
+              children: [
+                // Fixed Search Bar
+                Container(
+                  margin: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
+                  decoration: BoxDecoration(
+                    color: ColorManager.white.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(
+                      color: ColorManager.white.withValues(alpha: 0.3),
+                      width: 1.w,
                     ),
-                  );
-                }
-
-                if (!snapshot.hasData || (snapshot.data![0] as List).isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.apartment_outlined,
-                          size: 60.sp,
-                          color: ColorManager.white.withValues(alpha: 0.5),
-                        ),
-                        SizedBox(height: 16.h),
-                        Text(
-                          localizations.noUnitsAvailable,
-                          style: TextStyle(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w600,
-                            color: ColorManager.white,
-                          ),
-                        ),
-                        SizedBox(height: 8.h),
-                        Text(
-                          localizations.noUnitsFoundInBuilding,
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            color: ColorManager.white.withValues(alpha: 0.7),
-                          ),
-                        ),
-                      ],
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    style: TextStyle(
+                      color: ColorManager.white,
+                      fontSize: 14.sp,
                     ),
-                  );
-                }
+                    onChanged: (value) {
+                      // Trigger visual feedback immediately if needed, 
+                      // but the real search happened via debounced listener
+                      if (value.isEmpty && _searchQuery.isNotEmpty) {
+                        // Special case: clearing search should be immediate
+                        _debounce?.cancel();
+                        setState(() {
+                          _searchQuery = '';
+                        });
+                      }
+                    },
+                    decoration: InputDecoration(
+                      hintText: localizations.search,
+                      hintStyle: TextStyle(
+                        color: ColorManager.white.withValues(alpha: 0.5),
+                        fontSize: 14.sp,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: ColorManager.white.withValues(alpha: 0.5),
+                        size: 20.sp,
+                      ),
+                      suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: _searchController,
+                        builder: (context, value, child) {
+                          return value.text.isNotEmpty
+                              ? IconButton(
+                                  icon: Icon(
+                                    Icons.close,
+                                    color: ColorManager.white
+                                        .withValues(alpha: 0.5),
+                                    size: 20.sp,
+                                  ),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    _debounce?.cancel();
+                                    setState(() {
+                                      _searchQuery = '';
+                                    });
+                                  },
+                                )
+                              : const SizedBox.shrink();
+                        },
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 12.h,
+                      ),
+                    ),
+                  ),
+                ),
 
-                final List<UnitModel> allUnits =
-                    snapshot.data![0] as List<UnitModel>;
-                final photos = snapshot.data![1] as List<BuildingPhotoModel>;
+                // Units List
+                Expanded(
+                  child: FutureBuilder<List<dynamic>>(
+                    future: _combinedFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return _buildSkeletonBody();
+                      }
 
-                // Apply filtering
-                final filteredUnits = _selectedStatus == null
-                    ? allUnits
-                    : allUnits
-                          .where(
-                            (u) => u.unitStatus?.toInt() == _selectedStatus,
-                          )
-                          .toList();
-
-                log(
-                  '✅ Displaying ${filteredUnits.length} units and ${photos.length} photos',
-                  name: 'BuildingView',
-                );
-
-                // Group units by model code
-                Map<int, List<UnitModel>> unitsByModel = {};
-                for (var unit in filteredUnits) {
-                  final modelCode = unit.modelCode?.toInt() ?? 0;
-                  if (!unitsByModel.containsKey(modelCode)) {
-                    unitsByModel[modelCode] = [];
-                  }
-                  unitsByModel[modelCode]!.add(unit);
-                }
-
-                // Group photos by model code
-                Map<int, List<BuildingPhotoModel>> photosByModel = {};
-                for (var photo in photos) {
-                  final modelCode = photo.modelCode ?? 0;
-                  if (!photosByModel.containsKey(modelCode)) {
-                    photosByModel[modelCode] = [];
-                  }
-                  photosByModel[modelCode]!.add(photo);
-                }
-
-                // Get unique model codes from both photos AND filtered units
-                // We show models that have units or photos
-                final allModelCodes = {
-                  ...unitsByModel.keys,
-                  ...photosByModel.keys,
-                }.toList()..sort();
-
-                return RefreshIndicator(
-                  color: ColorManager.availableColor,
-                  onRefresh: () async {
-                    setState(() {
-                      _unitsFuture = _homeDatasource.getUnitsByBuilding(
-                        widget.building.buildingCode!,
-                      );
-                      _photosFuture = _homeDatasource.getAllPhotosByBuilding(
-                        widget.building.buildingCode!,
-                      );
-                    });
-                    await Future.wait([_unitsFuture, _photosFuture]);
-                  },
-                  child: ListView.builder(
-                    padding: EdgeInsets.symmetric(vertical: 8.h),
-                    itemCount: allModelCodes.length + 1, // +1 for legend
-                    itemBuilder: (context, index) {
-                      // First item is the color legend
-                      if (index == 0) {
-                        return Container(
-                          margin: EdgeInsets.symmetric(
-                            vertical: 8.h,
-                            horizontal: 4.w,
-                          ),
-                          padding: EdgeInsets.all(16.w),
-                          decoration: BoxDecoration(
-                            color: ColorManager.white.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(12.r),
-                            border: Border.all(
-                              color: ColorManager.white.withValues(alpha: 0.3),
-                              width: 1.w,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      if (snapshot.hasError) {
+                        log(snapshot.error.toString(),
+                            name: "BuildingView Error");
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              _buildLegendItem(
-                                localizations.all,
-                                ColorManager.white,
-                                null,
+                              Icon(
+                                Icons.error_outline,
+                                size: 60.sp,
+                                color: ColorManager.soldColor,
                               ),
-                              _buildLegendItem(
-                                localizations.available,
-                                ColorManager.availableColor,
-                                0,
+                              SizedBox(height: 16.h),
+                              Text(
+                                localizations.errorLoadingUnits,
+                                style: TextStyle(
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: ColorManager.white,
+                                ),
                               ),
-                              _buildLegendItem(
-                                localizations.reserved,
-                                ColorManager.white.withValues(alpha: 0.4),
-                                1,
+                              SizedBox(height: 8.h),
+                              Text(
+                                localizations.tryAgain,
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  color:
+                                      ColorManager.white.withValues(alpha: 0.7),
+                                ),
                               ),
-                              _buildLegendItem(
-                                localizations.sold,
-                                ColorManager.soldColor,
-                                3,
+                              SizedBox(height: 24.h),
+                              ElevatedButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _unitsFuture =
+                                        _homeDatasource.getUnitsByBuilding(
+                                      widget.building.buildingCode!,
+                                    );
+                                    _combinedFuture = Future.wait(
+                                        [_unitsFuture, _photosFuture]);
+                                  });
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: ColorManager.availableColor,
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 32.w,
+                                    vertical: 12.h,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12.r),
+                                  ),
+                                ),
+                                child: Text(
+                                  localizations.retry,
+                                  style: TextStyle(
+                                    color: ColorManager.white,
+                                    fontSize: 14.sp,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
                         );
                       }
 
-                      // Model sections
-                      final modelCode = allModelCodes[index - 1];
-                      final modelUnits = unitsByModel[modelCode] ?? [];
-                      final modelPhotos = photosByModel[modelCode] ?? [];
-
-                      // Skip if filtering and no units for this model
-                      if (_selectedStatus != null && modelUnits.isEmpty) {
-                        return const SizedBox.shrink();
+                      if (!snapshot.hasData ||
+                          (snapshot.data![0] as List).isEmpty) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.apartment_outlined,
+                                size: 60.sp,
+                                color: ColorManager.white.withValues(alpha: 0.5),
+                              ),
+                              SizedBox(height: 16.h),
+                              Text(
+                                localizations.noUnitsAvailable,
+                                style: TextStyle(
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: ColorManager.white,
+                                ),
+                              ),
+                              SizedBox(height: 8.h),
+                              Text(
+                                localizations.noUnitsFoundInBuilding,
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  color:
+                                      ColorManager.white.withValues(alpha: 0.7),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
                       }
 
-                      final modelName = modelPhotos.isNotEmpty
-                          ? modelPhotos.first.modelName ?? 'موديل $modelCode'
-                          : 'موديل $modelCode';
+                      final List<UnitModel> allUnits =
+                          snapshot.data![0] as List<UnitModel>;
+                      final photos =
+                          snapshot.data![1] as List<BuildingPhotoModel>;
 
-                      return ModelSection(
-                        modelName: modelName,
-                        units: modelUnits,
-                        photos: modelPhotos,
-                        allFilteredUnits: filteredUnits,
-                        onRefresh: () {
+                      // Basic Arabic normalization helper
+                      String normalize(String text) {
+                        return text
+                            .toLowerCase()
+                            .replaceAll('أ', 'ا')
+                            .replaceAll('إ', 'ا')
+                            .replaceAll('آ', 'ا')
+                            .replaceAll('ة', 'ه')
+                            .trim();
+                      }
+
+                      // Apply filtering
+                      final filteredUnits = allUnits.where((u) {
+                        final matchesStatus = _selectedStatus == null ||
+                            u.unitStatus?.toInt() == _selectedStatus;
+
+                        if (_searchQuery.isEmpty) return matchesStatus;
+
+                        final query = normalize(_searchQuery);
+                        final nameA = normalize(u.unitNameA ?? '');
+                        final nameE = (u.unitNameE ?? '').toLowerCase();
+
+                        final matchesSearch =
+                            nameA.contains(query) || nameE.contains(query);
+                        return matchesStatus && matchesSearch;
+                      }).toList();
+                      log(
+                        '✅ Displaying ${filteredUnits.length} units (total: ${allUnits.length})',
+                        name: 'BuildingView',
+                      );
+
+                      // Group units by model code
+                      Map<int, List<UnitModel>> unitsByModel = {};
+                      for (var unit in filteredUnits) {
+                        final modelCode = unit.modelCode?.toInt() ?? 0;
+                        if (!unitsByModel.containsKey(modelCode)) {
+                          unitsByModel[modelCode] = [];
+                        }
+                        unitsByModel[modelCode]!.add(unit);
+                      }
+
+                      // Group photos by model code
+                      Map<int, List<BuildingPhotoModel>> photosByModel = {};
+                      for (var photo in photos) {
+                        final modelCode = photo.modelCode ?? 0;
+                        if (!photosByModel.containsKey(modelCode)) {
+                          photosByModel[modelCode] = [];
+                        }
+                        photosByModel[modelCode]!.add(photo);
+                      }
+
+                      final allModelCodes = {
+                        ...unitsByModel.keys,
+                        ...photosByModel.keys,
+                      }.toList()
+                        ..sort();
+
+                      return RefreshIndicator(
+                        color: ColorManager.availableColor,
+                        onRefresh: () async {
                           setState(() {
                             _unitsFuture = _homeDatasource.getUnitsByBuilding(
                               widget.building.buildingCode!,
                             );
-                            _photosFuture = _homeDatasource
-                                .getAllPhotosByBuilding(
-                                  widget.building.buildingCode!,
-                                );
+                            _photosFuture =
+                                _homeDatasource.getAllPhotosByBuilding(
+                              widget.building.buildingCode!,
+                            );
+                            _combinedFuture =
+                                Future.wait([_unitsFuture, _photosFuture]);
                           });
+                          await _combinedFuture;
                         },
+                        child: filteredUnits.isEmpty &&
+                                (_selectedStatus != null ||
+                                    _searchQuery.isNotEmpty)
+                            ? ListView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.only(top: 80.h),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.search_off_rounded,
+                                          size: 60.sp,
+                                          color: ColorManager.white
+                                              .withValues(alpha: 0.3),
+                                        ),
+                                        SizedBox(height: 16.h),
+                                        Text(
+                                          localizations.noUnitsAvailable,
+                                          style: TextStyle(
+                                            fontSize: 16.sp,
+                                            fontWeight: FontWeight.w600,
+                                            color: ColorManager.white
+                                                .withValues(alpha: 0.7),
+                                          ),
+                                        ),
+                                        if (_searchQuery.isNotEmpty) ...[
+                                          SizedBox(height: 8.h),
+                                          Text(
+                                            _searchQuery,
+                                            style: TextStyle(
+                                              fontSize: 14.sp,
+                                              color:
+                                                  ColorManager.availableColor,
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : ListView.builder(
+                                padding: EdgeInsets.symmetric(vertical: 8.h),
+                                itemCount: allModelCodes.length + 1, // +1 for Legend
+                                itemBuilder: (context, index) {
+                            // First item is the color legend
+                            if (index == 0) {
+                              return Container(
+                                margin: EdgeInsets.symmetric(
+                                  vertical: 8.h,
+                                  horizontal: 4.w,
+                                ),
+                                padding: EdgeInsets.all(16.w),
+                                decoration: BoxDecoration(
+                                  color:
+                                      ColorManager.white.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(12.r),
+                                  border: Border.all(
+                                    color:
+                                        ColorManager.white.withValues(alpha: 0.3),
+                                    width: 1.w,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    _buildLegendItem(
+                                      localizations.all,
+                                      ColorManager.white,
+                                      null,
+                                    ),
+                                    _buildLegendItem(
+                                      localizations.available,
+                                      ColorManager.availableColor,
+                                      0,
+                                    ),
+                                    _buildLegendItem(
+                                      localizations.reserved,
+                                      ColorManager.white.withValues(alpha: 0.4),
+                                      1,
+                                    ),
+                                    _buildLegendItem(
+                                      localizations.sold,
+                                      ColorManager.soldColor,
+                                      3,
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+
+                            // Model sections
+                            final modelCode = allModelCodes[index - 1];
+                            final modelUnits = unitsByModel[modelCode] ?? [];
+                            final modelPhotos = photosByModel[modelCode] ?? [];
+
+                            // Skip if filtering (status or search) and no units for this model
+                            if ((_selectedStatus != null ||
+                                    _searchQuery.isNotEmpty) &&
+                                modelUnits.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+
+                            final modelName = modelPhotos.isNotEmpty
+                                ? modelPhotos.first.modelName ??
+                                    'موديل $modelCode'
+                                : 'موديل $modelCode';
+
+                            return ModelSection(
+                              modelName: modelName,
+                              units: modelUnits,
+                              photos: modelPhotos,
+                              allFilteredUnits: filteredUnits,
+                              onRefresh: () {
+                                setState(() {
+                                  _unitsFuture =
+                                      _homeDatasource.getUnitsByBuilding(
+                                    widget.building.buildingCode!,
+                                  );
+                                  _photosFuture = _homeDatasource
+                                      .getAllPhotosByBuilding(
+                                    widget.building.buildingCode!,
+                                  );
+                                  _combinedFuture = Future.wait(
+                                      [_unitsFuture, _photosFuture]);
+                                });
+                              },
+                            );
+                          },
+                        ),
                       );
                     },
                   ),
-                );
-              },
+                ),
+              ],
             ),
           ),
         ],

@@ -88,5 +88,6 @@
   "semiCashPayment": "Semi-Cash",
   "enterMobileNumber": "Enter mobile number",
   "enterNationalId": "Enter national ID",
-  "selectPaymentType": "Select payment type"
+  "selectPaymentType": "Select payment type",
+  "search": "Search..."
 }

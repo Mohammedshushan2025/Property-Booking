@@ -274,4 +274,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get selectPaymentType => 'اختر طريقة الدفع';
+
+  @override
+  String get search => 'بحث...';
 }

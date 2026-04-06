@@ -88,5 +88,6 @@
     "semiCashPayment": "سيمي كاش",
     "enterMobileNumber": "ادخل رقم الموبايل",
     "enterNationalId": "ادخل الرقم القومي",
-    "selectPaymentType": "اختر طريقة الدفع"
+    "selectPaymentType": "اختر طريقة الدفع",
+    "search": "بحث..."
 }
