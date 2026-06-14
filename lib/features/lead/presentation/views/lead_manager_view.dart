@@ -37,7 +37,6 @@ class _LeadManagerViewState extends State<LeadManagerView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: ColorManager.darkGrayColor,
       backgroundColor: ColorManager.black.withValues(alpha: 0.4),
       body: SafeArea(
         child: Stack(
