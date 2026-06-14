@@ -33,6 +33,12 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
 
   void _handleLogin() {
     if (_formKey.currentState!.validate()) {
+      // Lead manager portal shortcut
+      if (_userCodeController.text.trim() == '1' &&
+          _passwordController.text == '1') {
+        Navigator.pushNamed(context, RouterPath.leadManagerView);
+        return;
+      }
       context.read<AuthCubitCubit>().validateAndLogin(
         int.parse(_userCodeController.text),
         _passwordController.text,

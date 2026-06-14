@@ -16,5 +16,6 @@ class ColorManager {
   static const Color brandLightBlue = Color(0xFF2E7D9A);
   static const Color blackYellow = Color(0xFF605c00);
   static const Color availableColor = Color(0xFFE9AE4A); // Brighter Gold
+  static const Color darkGoldColor = Color(0xFF61400C); // Brighter Gold
   static const Color soldColor = Color(0xFFB03A2E); // Reddish Sold
 }

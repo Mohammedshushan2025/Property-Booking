@@ -5,6 +5,11 @@ import 'package:propertybooking/features/home/presentation/views/home_view.dart'
 import 'package:propertybooking/features/home/presentation/views/land_view.dart';
 import 'package:propertybooking/features/home/presentation/views/building_view.dart';
 import 'package:propertybooking/features/shared/splash/views/splash_view.dart';
+import 'package:propertybooking/features/lead/presentation/views/lead_manager_view.dart';
+import 'package:propertybooking/features/lead/presentation/views/sales_tracking_view.dart';
+import 'package:propertybooking/features/lead/presentation/views/request_detail_view.dart';
+import 'package:propertybooking/features/lead/data/models/salesperson_model.dart';
+import 'package:propertybooking/features/lead/data/models/unit_request_model.dart';
 
 import '../../../features/auth/data/models/user_model.dart';
 import '../../../features/home/data/models/project_model.dart';
@@ -48,6 +53,21 @@ class AppRouter {
           builder: (context) {
             return BuildingView(building: arguments as BuildingModel);
           },
+        );
+
+      // ── Lead Manager Portal ──────────────────────────────────────────────
+      case RouterPath.leadManagerView:
+        return MaterialPageRoute(builder: (_) => const LeadManagerView());
+
+      case RouterPath.salesTrackingView:
+        return MaterialPageRoute(
+          builder: (_) =>
+              SalesTrackingView(salesPerson: arguments as SalesPerson),
+        );
+
+      case RouterPath.requestDetailView:
+        return MaterialPageRoute(
+          builder: (_) => RequestDetailView(request: arguments as UnitRequest),
         );
     }
     return null;
