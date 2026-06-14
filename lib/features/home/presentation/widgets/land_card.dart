@@ -93,77 +93,90 @@ class LandCard extends StatelessWidget {
                         width: 1.5.w,
                       ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.end,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        // Land Name (Arabic only with "مبني")
-                        Text(
-                          land.buildingNameA?.replaceAll("القطعه", "مبني") ??
-                              'غير معروف',
-                          style: TextStyle(
-                            fontSize: 20.sp,
-                            fontWeight: FontWeight.bold,
-                            color: ColorManager.white,
-                            letterSpacing: 0.5,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black.withValues(alpha: 0.5),
-                                offset: const Offset(0, 2),
-                                blurRadius: 4,
-                              ),
-                            ],
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-
-                        SizedBox(height: 4.h),
-
-                        // Land Code
-                        Text(
-                          'كود المبني: ${land.buildingCode ?? 'N/A'}',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            color: ColorManager.white.withValues(alpha: 0.9),
-                            letterSpacing: 0.3,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black.withValues(alpha: 0.5),
-                                offset: const Offset(0, 1),
-                                blurRadius: 2,
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        // Arrow button at bottom right
-                        Align(
-                          alignment: Alignment.bottomRight,
-                          child: Container(
-                            margin: EdgeInsets.only(top: 12.h),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: ColorManager.brandBlue.withValues(
-                                alpha: 0.9,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: ColorManager.brandBlue.withValues(
-                                    alpha: 0.5,
-                                  ),
-                                  blurRadius: 10,
-                                  spreadRadius: 2,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Land Name (Arabic only with "مبني")
+                              Text(
+                                land.buildingNameA?.replaceAll(
+                                      "القطعه",
+                                      "مبني",
+                                    ) ??
+                                    'غير معروف',
+                                style: TextStyle(
+                                  fontSize: 20.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: ColorManager.white,
+                                  letterSpacing: 0.5,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.5,
+                                      ),
+                                      offset: const Offset(0, 2),
+                                      blurRadius: 4,
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.all(8.w),
-                              child: Icon(
-                                Icons.arrow_forward_ios_rounded,
-                                color: ColorManager.white,
-                                size: 18.sp,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
+
+                              SizedBox(height: 4.h),
+
+                              // Land Code
+                              Text(
+                                'كود المبني: ${land.buildingCode ?? 'N/A'}',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  color: ColorManager.white.withValues(
+                                    alpha: 0.9,
+                                  ),
+                                  letterSpacing: 0.3,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.5,
+                                      ),
+                                      offset: const Offset(0, 1),
+                                      blurRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: 12.w),
+                        // Arrow button at bottom right
+                        Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: ColorManager.brandBlue.withValues(
+                              alpha: 0.9,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: ColorManager.brandBlue.withValues(
+                                  alpha: 0.5,
+                                ),
+                                blurRadius: 10,
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.all(8.w),
+                            child: Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              color: ColorManager.white,
+                              size: 18.sp,
                             ),
                           ),
                         ),
