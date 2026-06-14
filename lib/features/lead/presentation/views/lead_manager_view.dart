@@ -57,10 +57,10 @@ class _LeadManagerViewState extends State<LeadManagerView> {
               ),
             ),
 
-            Column(
-              children: [
-                const ManagerHeaderWidget(),
-                Expanded(child: _buildTabBody()),
+            CustomScrollView(
+              slivers: [
+                const SliverToBoxAdapter(child: ManagerHeaderWidget()),
+                _buildTabSliver(),
               ],
             ),
           ],
@@ -70,80 +70,90 @@ class _LeadManagerViewState extends State<LeadManagerView> {
     );
   }
 
-  Widget _buildTabBody() {
+  Widget _buildTabSliver() {
     switch (_currentTab) {
       case 0:
-        return _buildTeamTab();
+        return _buildTeamSliver();
       case 1:
-        return _buildRequestsTab();
+        return _buildRequestsSliver();
       case 2:
-        return const SettingsTab();
+        return const SliverToBoxAdapter(child: SettingsTab());
       default:
-        return const SizedBox.shrink();
+        return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
   }
 
   // ── Tab 0 — فريق المبيعات ────────────────────────────────────────────────────
-  Widget _buildTeamTab() {
-    return ListView.builder(
+  Widget _buildTeamSliver() {
+    return SliverPadding(
       padding: EdgeInsets.only(top: 4.h, bottom: 20.h),
-      itemCount: LeadMockData.salesPeople.length,
-      itemBuilder: (context, index) {
-        final person = LeadMockData.salesPeople[index];
-        return SalespersonCard(
-          person: person,
-          onTrackTap: () {
-            Navigator.pushNamed(
-              context,
-              RouterPath.salesTrackingView,
-              arguments: person,
-            );
-          },
-        );
-      },
+      sliver: SliverList.builder(
+        itemCount: LeadMockData.salesPeople.length,
+        itemBuilder: (context, index) {
+          final person = LeadMockData.salesPeople[index];
+          return SalespersonCard(
+            person: person,
+            onTrackTap: () {
+              Navigator.pushNamed(
+                context,
+                RouterPath.salesTrackingView,
+                arguments: person,
+              );
+            },
+          );
+        },
+      ),
     );
   }
 
   // ── Tab 1 — معاينة ────────────────────────────────────────────────────────────
-  Widget _buildRequestsTab() {
+  Widget _buildRequestsSliver() {
     if (_requests.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.check_circle_outline,
-              size: 60.sp,
-              color: const Color(0xFF4CAF50),
-            ),
-            SizedBox(height: 12.h),
-            Text(
-              'لا توجد طلبات معلقة',
-              style: TextStyle(color: ColorManager.grayColor, fontSize: 15.sp),
-            ),
-          ],
+      return SliverFillRemaining(
+        hasScrollBody: false,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.check_circle_outline,
+                size: 60.sp,
+                color: const Color(0xFF4CAF50),
+              ),
+              SizedBox(height: 12.h),
+              Text(
+                'لا توجد طلبات معلقة',
+                style: TextStyle(
+                  color: ColorManager.grayColor,
+                  fontSize: 15.sp,
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
-    return ListView.builder(
+    return SliverPadding(
       padding: EdgeInsets.only(top: 4.h, bottom: 20.h),
-      itemCount: _requests.length,
-      itemBuilder: (context, index) {
-        final request = _requests[index];
-        return RequestCard(
-          request: request,
-          onTap: () async {
-            final confirmed = await Navigator.pushNamed(
-              context,
-              RouterPath.requestDetailView,
-              arguments: request,
-            );
-            if (confirmed == true) {
-              _removeRequest(request.id);
-            }
-          },
-        );
-      },
+      sliver: SliverList.builder(
+        itemCount: _requests.length,
+        itemBuilder: (context, index) {
+          final request = _requests[index];
+          return RequestCard(
+            request: request,
+            onTap: () async {
+              final confirmed = await Navigator.pushNamed(
+                context,
+                RouterPath.requestDetailView,
+                arguments: request,
+              );
+              if (confirmed == true) {
+                _removeRequest(request.id);
+              }
+            },
+          );
+        },
+      ),
     );
   }
 

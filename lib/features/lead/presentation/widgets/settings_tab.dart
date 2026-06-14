@@ -13,7 +13,7 @@ class SettingsTab extends StatelessWidget {
     final langProvider = context.watch<LanguageProvider>();
     final isArabic = langProvider.isArabic;
 
-    return SingleChildScrollView(
+    return Padding(
       padding: EdgeInsets.all(16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
