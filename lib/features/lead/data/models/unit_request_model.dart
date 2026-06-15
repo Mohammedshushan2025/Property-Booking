@@ -10,6 +10,7 @@ class UnitRequest {
   final double unitPrice;
   final String paymentType;
   final DateTime requestDate;
+  final String? assignedSalesPersonId;
 
   const UnitRequest({
     required this.id,
@@ -23,5 +24,36 @@ class UnitRequest {
     required this.unitPrice,
     required this.paymentType,
     required this.requestDate,
+    this.assignedSalesPersonId,
   });
+
+  UnitRequest copyWith({
+    String? id,
+    String? customerName,
+    String? customerPhone,
+    String? customerNationalId,
+    String? unitCode,
+    String? unitType,
+    String? projectName,
+    String? zone,
+    double? unitPrice,
+    String? paymentType,
+    DateTime? requestDate,
+    String? assignedSalesPersonId,
+  }) {
+    return UnitRequest(
+      id: id ?? this.id,
+      customerName: customerName ?? this.customerName,
+      customerPhone: customerPhone ?? this.customerPhone,
+      customerNationalId: customerNationalId ?? this.customerNationalId,
+      unitCode: unitCode ?? this.unitCode,
+      unitType: unitType ?? this.unitType,
+      projectName: projectName ?? this.projectName,
+      zone: zone ?? this.zone,
+      unitPrice: unitPrice ?? this.unitPrice,
+      paymentType: paymentType ?? this.paymentType,
+      requestDate: requestDate ?? this.requestDate,
+      assignedSalesPersonId: assignedSalesPersonId ?? this.assignedSalesPersonId,
+    );
+  }
 }

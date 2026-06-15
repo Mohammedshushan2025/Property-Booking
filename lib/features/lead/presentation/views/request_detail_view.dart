@@ -298,6 +298,15 @@ class _RequestDetailViewState extends State<RequestDetailView> {
     setState(() => _isConfirming = true);
     await Future.delayed(const Duration(milliseconds: 600));
     if (!mounted) return;
+
+    // Update in-memory mock data
+    final index = LeadMockData.unitRequests.indexWhere((r) => r.id == widget.request.id);
+    if (index != -1) {
+      LeadMockData.unitRequests[index] = widget.request.copyWith(
+        assignedSalesPersonId: _selectedRep!.id,
+      );
+    }
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(

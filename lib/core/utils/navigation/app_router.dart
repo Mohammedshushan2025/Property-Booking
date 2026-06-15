@@ -16,6 +16,8 @@ import '../../../features/home/data/models/project_model.dart';
 import '../../../features/home/data/models/building_model.dart';
 import '../../../features/home/data/datasource/home_datasource.dart';
 
+import 'package:propertybooking/features/lead/presentation/views/salesperson_home_view.dart';
+
 class AppRouter {
   Route? generateRoute(RouteSettings settings) {
     final arguments = settings.arguments as dynamic;
@@ -68,6 +70,12 @@ class AppRouter {
       case RouterPath.requestDetailView:
         return MaterialPageRoute(
           builder: (_) => RequestDetailView(request: arguments as UnitRequest),
+        );
+
+      case RouterPath.salespersonHomeView:
+        return MaterialPageRoute(
+          builder: (_) =>
+              SalespersonHomeView(salesPerson: arguments as SalesPerson),
         );
     }
     return null;

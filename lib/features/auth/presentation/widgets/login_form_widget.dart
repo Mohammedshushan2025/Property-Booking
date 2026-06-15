@@ -10,6 +10,7 @@ import 'package:propertybooking/features/auth/presentation/widgets/custom_login_
 import 'package:propertybooking/features/auth/presentation/widgets/error_dialog.dart';
 import 'package:propertybooking/features/auth/presentation/widgets/login_footer_widget.dart';
 
+import 'package:propertybooking/features/lead/mock/lead_mock_data.dart';
 import '../../../../core/utils/navigation/router_path.dart';
 
 class LoginFormWidget extends StatefulWidget {
@@ -33,12 +34,28 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
 
   void _handleLogin() {
     if (_formKey.currentState!.validate()) {
+      final inputCode = _userCodeController.text.trim();
+      final inputPassword = _passwordController.text;
+
       // Lead manager portal shortcut
-      if (_userCodeController.text.trim() == '1' &&
-          _passwordController.text == '1') {
+      if (inputCode == '1' && inputPassword == '1') {
         Navigator.pushNamed(context, RouterPath.leadManagerView);
         return;
       }
+      
+      // Salesperson portal shortcut
+      if (inputCode == '2' && inputPassword == '1') {
+        final salesperson = LeadMockData.salesPeople.firstWhere(
+          (s) => s.id == 'SP001',
+        );
+        Navigator.pushNamed(
+          context,
+          RouterPath.salespersonHomeView,
+          arguments: salesperson,
+        );
+        return;
+      }
+
       context.read<AuthCubitCubit>().validateAndLogin(
         int.parse(_userCodeController.text),
         _passwordController.text,

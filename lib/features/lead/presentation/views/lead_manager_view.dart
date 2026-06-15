@@ -20,14 +20,13 @@ class LeadManagerView extends StatefulWidget {
 class _LeadManagerViewState extends State<LeadManagerView> {
   int _currentTab = 0;
   late List _requests;
-
   @override
   void initState() {
     super.initState();
-    // Copy so we can remove items
-    _requests = List.from(LeadMockData.unitRequests);
+    _requests = LeadMockData.unitRequests
+        .where((r) => r.assignedSalesPersonId == null)
+        .toList();
   }
-
   void _removeRequest(String id) {
     setState(() {
       _requests.removeWhere((r) => r.id == id);

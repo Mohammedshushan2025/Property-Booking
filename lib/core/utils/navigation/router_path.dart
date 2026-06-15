@@ -9,4 +9,5 @@ class RouterPath {
   static const String leadManagerView = 'LeadManagerView';
   static const String salesTrackingView = 'SalesTrackingView';
   static const String requestDetailView = 'RequestDetailView';
+  static const String salespersonHomeView = 'SalespersonHomeView';
 }
