@@ -34,26 +34,191 @@ class _SalespersonHomeViewState extends State<SalespersonHomeView> {
   void _loadRequests() {
     setState(() {
       _myRequests = LeadMockData.unitRequests
-          .where((r) => r.assignedSalesPersonId == widget.salesPerson.id)
+          .where(
+            (r) =>
+                r.assignedSalesPersonId == widget.salesPerson.id &&
+                r.status != 'completed',
+          )
           .toList();
     });
   }
 
   void _completeRequest(String id) {
+    final notesController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Container(
+            padding: EdgeInsets.all(20.w),
+            decoration: BoxDecoration(
+              color: ColorManager.darkGray,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(24.r),
+                topRight: Radius.circular(24.r),
+              ),
+              border: Border.all(color: Colors.white10),
+            ),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.rate_review_outlined,
+                        color: ColorManager.availableColor,
+                        size: 22.sp,
+                      ),
+                      SizedBox(width: 8.w),
+                      Text(
+                        'إضافة ملاحظات المعاينة',
+                        style: TextStyle(
+                          color: ColorManager.white,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16.h),
+                  Text(
+                    'ملاحظات سريعة:',
+                    style: TextStyle(
+                      color: ColorManager.grayColor,
+                      fontSize: 12.sp,
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Wrap(
+                    spacing: 8.w,
+                    runSpacing: 8.h,
+                    children:
+                        [
+                          'العميل مهتم جداً ويطلب التعاقد',
+                          'طلب تأجيل الحجز للمراجعة',
+                          'الموقع لم يلقَ إعجاب العميل',
+                          'السعر مرتفع ويطلب تقسيط مرن',
+                        ].map((tag) {
+                          return InkWell(
+                            onTap: () {
+                              notesController.text = tag;
+                            },
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 10.w,
+                                vertical: 6.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.05),
+                                borderRadius: BorderRadius.circular(20.r),
+                                border: Border.all(color: Colors.white12),
+                              ),
+                              child: Text(
+                                tag,
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 11.sp,
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                  ),
+                  SizedBox(height: 16.h),
+                  TextFormField(
+                    controller: notesController,
+                    maxLines: 4,
+                    style: TextStyle(
+                      color: ColorManager.white,
+                      fontSize: 13.sp,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'اكتب تفاصيل وملاحظات المعاينة هنا...',
+                      hintStyle: TextStyle(
+                        color: ColorManager.grayColor,
+                        fontSize: 12.sp,
+                      ),
+                      filled: true,
+                      fillColor: Colors.black.withValues(alpha: 0.15),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: const BorderSide(color: Colors.white12),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(
+                          color: ColorManager.availableColor,
+                        ),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'الرجاء إدخال ملاحظات المعاينة';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 20.h),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (formKey.currentState!.validate()) {
+                        final notes = notesController.text.trim();
+                        Navigator.pop(context);
+                        _submitCompletion(id, notes);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorManager.availableColor,
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                    ),
+                    child: const Text(
+                      'تأكيد الإتمام',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Cairo',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _submitCompletion(String id, String notes) {
     setState(() {
-      // Update in-memory state
       final index = LeadMockData.unitRequests.indexWhere((r) => r.id == id);
       if (index != -1) {
-        // Remove or update the assignment to signal it's done
-        LeadMockData.unitRequests.removeAt(index);
+        final oldReq = LeadMockData.unitRequests[index];
+        LeadMockData.unitRequests[index] = oldReq.copyWith(
+          status: 'completed',
+          salespersonNotes: notes,
+        );
       }
       _loadRequests();
     });
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text(
-          'تم إتمام المعاينة بنجاح ونقلها للأرشيف ✓',
+          'تم تسجيل ملاحظات المعاينة وإتمامها بنجاح ونقلها للإدارة ✓',
           style: TextStyle(fontFamily: 'Cairo'),
         ),
         backgroundColor: const Color(0xFF4CAF50),
@@ -82,7 +247,9 @@ class _SalespersonHomeViewState extends State<SalespersonHomeView> {
   }
 
   void _openGoogleMaps(double lat, double lng) async {
-    final Uri url = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
+    final Uri url = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
+    );
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     }
@@ -152,7 +319,7 @@ class _SalespersonHomeViewState extends State<SalespersonHomeView> {
                 ),
               ),
               const Divider(color: Colors.white12),
-              
+
               // Interactive Map
               Expanded(
                 child: ClipRRect(
@@ -169,7 +336,8 @@ class _SalespersonHomeViewState extends State<SalespersonHomeView> {
                         ),
                         children: [
                           TileLayer(
-                            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                            urlTemplate:
+                                'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                             userAgentPackageName: 'com.example.propertybooking',
                           ),
                           MarkerLayer(
@@ -188,15 +356,21 @@ class _SalespersonHomeViewState extends State<SalespersonHomeView> {
                           ),
                         ],
                       ),
-                      
+
                       // Open Google Maps floating button
                       Positioned(
                         bottom: 16.h,
                         left: 16.w,
                         child: FloatingActionButton.extended(
-                          onPressed: () => _openGoogleMaps(latLng.latitude, latLng.longitude),
+                          onPressed: () => _openGoogleMaps(
+                            latLng.latitude,
+                            latLng.longitude,
+                          ),
                           backgroundColor: ColorManager.brandBlue,
-                          icon: const Icon(Icons.navigation, color: Colors.white),
+                          icon: const Icon(
+                            Icons.navigation,
+                            color: Colors.white,
+                          ),
                           label: Text(
                             'فتح في خرائط جوجل',
                             style: TextStyle(
@@ -250,14 +424,17 @@ class _SalespersonHomeViewState extends State<SalespersonHomeView> {
                 slivers: [
                   // Header profile overview
                   SliverToBoxAdapter(child: _buildProfileCard()),
-                  
+
                   // KPI stats
                   SliverToBoxAdapter(child: _buildKPISection()),
-                  
+
                   // Section Header
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 12.h,
+                      ),
                       child: Row(
                         children: [
                           Icon(
@@ -286,7 +463,7 @@ class _SalespersonHomeViewState extends State<SalespersonHomeView> {
                       ),
                     ),
                   ),
-                  
+
                   // Inspection requests list
                   _buildRequestsList(),
                 ],
@@ -376,7 +553,9 @@ class _SalespersonHomeViewState extends State<SalespersonHomeView> {
             children: [
               Switch.adaptive(
                 value: _isOnline,
-                activeTrackColor: const Color(0xFF4CAF50).withValues(alpha: 0.5),
+                activeTrackColor: const Color(
+                  0xFF4CAF50,
+                ).withValues(alpha: 0.5),
                 activeThumbColor: const Color(0xFF4CAF50),
                 onChanged: (val) {
                   setState(() => _isOnline = val);
@@ -385,7 +564,9 @@ class _SalespersonHomeViewState extends State<SalespersonHomeView> {
               Text(
                 _isOnline ? 'نشط الآن' : 'غير متصل',
                 style: TextStyle(
-                  color: _isOnline ? const Color(0xFF4CAF50) : ColorManager.grayColor,
+                  color: _isOnline
+                      ? const Color(0xFF4CAF50)
+                      : ColorManager.grayColor,
                   fontSize: 10.sp,
                   fontWeight: FontWeight.bold,
                 ),
@@ -553,7 +734,9 @@ class _SalespersonHomeViewState extends State<SalespersonHomeView> {
   }
 
   Widget _buildRequestItemCard(UnitRequest request) {
-    final formattedDate = DateFormat('dd/MM/yyyy · hh:mm a').format(request.requestDate);
+    final formattedDate = DateFormat(
+      'dd/MM/yyyy · hh:mm a',
+    ).format(request.requestDate);
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
@@ -573,7 +756,11 @@ class _SalespersonHomeViewState extends State<SalespersonHomeView> {
               CircleAvatar(
                 radius: 20.r,
                 backgroundColor: ColorManager.brandBlue.withValues(alpha: 0.1),
-                child: Icon(Icons.person, color: ColorManager.brandLightBlue, size: 20.sp),
+                child: Icon(
+                  Icons.person,
+                  color: ColorManager.brandLightBlue,
+                  size: 20.sp,
+                ),
               ),
               SizedBox(width: 12.w),
               Expanded(
@@ -601,30 +788,46 @@ class _SalespersonHomeViewState extends State<SalespersonHomeView> {
               ),
               // Direction/Map launch
               IconButton(
-                icon: Icon(Icons.map_outlined, color: ColorManager.availableColor, size: 20.sp),
+                icon: Icon(
+                  Icons.map_outlined,
+                  color: ColorManager.availableColor,
+                  size: 20.sp,
+                ),
                 tooltip: 'عرض الخريطة',
                 onPressed: () => _showMapModal(request),
               ),
             ],
           ),
-          
+
           SizedBox(height: 12.h),
           const Divider(color: Colors.white10, height: 1),
           SizedBox(height: 12.h),
-          
+
           // Request Details (Phone & Location Zone & Date)
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildDetailItem(Icons.phone_iphone, 'رقم الهاتف', request.customerPhone),
-              _buildDetailItem(Icons.location_on_outlined, 'المنطقة', request.zone),
+              _buildDetailItem(
+                Icons.phone_iphone,
+                'رقم الهاتف',
+                request.customerPhone,
+              ),
+              _buildDetailItem(
+                Icons.location_on_outlined,
+                'المنطقة',
+                request.zone,
+              ),
             ],
           ),
           SizedBox(height: 10.h),
-          _buildDetailItem(Icons.calendar_month_outlined, 'تاريخ وتوقيت المعاينة', formattedDate),
-          
+          _buildDetailItem(
+            Icons.calendar_month_outlined,
+            'تاريخ وتوقيت المعاينة',
+            formattedDate,
+          ),
+
           SizedBox(height: 16.h),
-          
+
           // Action Buttons: Call & Complete
           Row(
             children: [
@@ -652,7 +855,10 @@ class _SalespersonHomeViewState extends State<SalespersonHomeView> {
                   icon: const Icon(Icons.check, color: Colors.black),
                   label: const Text(
                     'تمت المعاينة',
-                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: ColorManager.availableColor,
@@ -680,10 +886,7 @@ class _SalespersonHomeViewState extends State<SalespersonHomeView> {
           children: [
             Text(
               label,
-              style: TextStyle(
-                color: ColorManager.grayColor,
-                fontSize: 10.sp,
-              ),
+              style: TextStyle(color: ColorManager.grayColor, fontSize: 10.sp),
             ),
             Text(
               value,

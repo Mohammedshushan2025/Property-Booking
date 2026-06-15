@@ -4,6 +4,7 @@ import 'package:propertybooking/core/utils/manager/color_manager/color_manager.d
 import 'package:propertybooking/core/utils/navigation/router_path.dart';
 import '../../../../core/utils/manager/assets_manager/image_manager.dart';
 import '../../../../core/widgets/Images/custome_image.dart';
+import '../../data/models/unit_request_model.dart';
 import '../../mock/lead_mock_data.dart';
 import '../widgets/manager_header_widget.dart';
 import '../widgets/salesperson_card.dart';
@@ -19,17 +20,28 @@ class LeadManagerView extends StatefulWidget {
 
 class _LeadManagerViewState extends State<LeadManagerView> {
   int _currentTab = 0;
-  late List _requests;
+  int _requestsSubTab = 0;
+  late List<UnitRequest> _requests;
+
   @override
   void initState() {
     super.initState();
-    _requests = LeadMockData.unitRequests
-        .where((r) => r.assignedSalesPersonId == null)
-        .toList();
+    _loadRequests();
   }
-  void _removeRequest(String id) {
+
+  void _loadRequests() {
     setState(() {
-      _requests.removeWhere((r) => r.id == id);
+      if (_requestsSubTab == 0) {
+        _requests = LeadMockData.unitRequests
+            .where(
+              (r) => r.assignedSalesPersonId == null && r.status == 'pending',
+            )
+            .toList();
+      } else {
+        _requests = LeadMockData.unitRequests
+            .where((r) => r.status == 'completed')
+            .toList();
+      }
     });
   }
 
@@ -106,37 +118,129 @@ class _LeadManagerViewState extends State<LeadManagerView> {
 
   // ── Tab 1 — معاينة ────────────────────────────────────────────────────────────
   Widget _buildRequestsSliver() {
-    if (_requests.isEmpty) {
-      return SliverFillRemaining(
-        hasScrollBody: false,
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.check_circle_outline,
-                size: 60.sp,
-                color: const Color(0xFF4CAF50),
-              ),
-              SizedBox(height: 12.h),
-              Text(
-                'لا توجد طلبات معلقة',
-                style: TextStyle(
-                  color: ColorManager.grayColor,
-                  fontSize: 15.sp,
+    final totalCount = _requests.isEmpty ? 2 : _requests.length + 1;
+    return SliverPadding(
+      padding: EdgeInsets.only(bottom: 20.h),
+      sliver: SliverList.builder(
+        itemCount: totalCount,
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            // ── Sub-tabs Header ──
+            return Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h),
+              child: Container(
+                height: 44.h,
+                decoration: BoxDecoration(
+                  color: ColorManager.darkGray.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: Colors.white10),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            _requestsSubTab = 0;
+                            _loadRequests();
+                          });
+                        },
+                        borderRadius: BorderRadius.circular(12.r),
+                        child: Container(
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: _requestsSubTab == 0
+                                ? ColorManager.availableColor
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                          child: Text(
+                            'قيد الانتظار',
+                            style: TextStyle(
+                              color: _requestsSubTab == 0
+                                  ? Colors.black
+                                  : ColorManager.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12.sp,
+                              fontFamily: 'Cairo',
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            _requestsSubTab = 1;
+                            _loadRequests();
+                          });
+                        },
+                        borderRadius: BorderRadius.circular(12.r),
+                        child: Container(
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: _requestsSubTab == 1
+                                ? ColorManager.availableColor
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                          child: Text(
+                            'معاينات مكتملة',
+                            style: TextStyle(
+                              color: _requestsSubTab == 1
+                                  ? Colors.black
+                                  : ColorManager.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12.sp,
+                              fontFamily: 'Cairo',
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-      );
-    }
-    return SliverPadding(
-      padding: EdgeInsets.only(top: 4.h, bottom: 20.h),
-      sliver: SliverList.builder(
-        itemCount: _requests.length,
-        itemBuilder: (context, index) {
-          final request = _requests[index];
+            );
+          }
+
+          // If requests list is empty, show empty state
+          if (_requests.isEmpty) {
+            return Padding(
+              padding: EdgeInsets.only(top: 60.h),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _requestsSubTab == 0
+                          ? Icons.hourglass_empty
+                          : Icons.check_circle_outline,
+                      size: 60.sp,
+                      color: _requestsSubTab == 0
+                          ? ColorManager.availableColor
+                          : const Color(0xFF4CAF50),
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      _requestsSubTab == 0
+                          ? 'لا توجد طلبات معلقة بانتظار التعيين'
+                          : 'لا توجد معاينات مكتملة حالياً',
+                      style: TextStyle(
+                        color: ColorManager.grayColor,
+                        fontSize: 14.sp,
+                        fontFamily: 'Cairo',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          // Render Request Card
+          final request = _requests[index - 1];
           return RequestCard(
             request: request,
             onTap: () async {
@@ -146,7 +250,7 @@ class _LeadManagerViewState extends State<LeadManagerView> {
                 arguments: request,
               );
               if (confirmed == true) {
-                _removeRequest(request.id);
+                _loadRequests();
               }
             },
           );

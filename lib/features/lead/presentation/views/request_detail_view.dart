@@ -131,161 +131,249 @@ class _RequestDetailViewState extends State<RequestDetailView> {
 
             SizedBox(height: 16.h),
 
-            // ── Assign Rep Card ───────────────────────────────────────────────
-            _SectionCard(
-              title: 'تعيين مندوب',
-              icon: Icons.assignment_ind_outlined,
-              iconColor: ColorManager.primaryColor,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'اختر مندوباً نشطاً لهذا الطلب',
-                    style: TextStyle(
-                      color: ColorManager.grayColor,
-                      fontSize: 11.sp,
-                    ),
-                  ),
-                  SizedBox(height: 10.h),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 12.w,
-                      vertical: 4.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: ColorManager.darkGrayColor,
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(
-                        color: _selectedRep != null
-                            ? ColorManager.availableColor.withValues(alpha: 0.5)
-                            : Colors.white12,
+            if (widget.request.status == 'completed') ...[
+              // ── Completed Status Card ─────────────────────────────────────────
+              _SectionCard(
+                title: 'حالة المعاينة والتقارير',
+                icon: Icons.check_circle_outline,
+                iconColor: const Color(0xFF4CAF50),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _InfoRow(
+                      label: 'حالة الطلب',
+                      value: 'تمت المعاينة بنجاح ✓',
+                      valueStyle: TextStyle(
+                        color: const Color(0xFF4CAF50),
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<SalesPerson>(
-                        value: _selectedRep,
-                        isExpanded: true,
-                        hint: Text(
-                          'اختر المندوب ...',
-                          style: TextStyle(
-                            color: ColorManager.grayColor,
-                            fontSize: 13.sp,
-                          ),
-                        ),
-                        dropdownColor: ColorManager.darkGrayColor,
-                        icon: Icon(
-                          Icons.keyboard_arrow_down,
-                          color: ColorManager.availableColor,
-                        ),
-                        items: _activeReps.map((rep) {
-                          return DropdownMenuItem<SalesPerson>(
-                            value: rep,
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 14.r,
-                                  backgroundImage: NetworkImage(rep.avatarUrl),
-                                ),
-                                SizedBox(width: 10.w),
-                                Expanded(
-                                  child: Text(
-                                    '${rep.name} (${rep.zone})',
-                                    style: TextStyle(
-                                      color: ColorManager.white,
-                                      fontSize: 13.sp,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
+                    if (widget.request.assignedSalesPersonId != null) ...[
+                      Builder(
+                        builder: (context) {
+                          final salesperson = LeadMockData.salesPeople.firstWhere(
+                            (s) => s.id == widget.request.assignedSalesPersonId,
+                            orElse: () => const SalesPerson(
+                              id: '',
+                              name: 'غير معروف',
+                              avatarUrl:
+                                  'https://images.unsplash.com/photo-1560250097-0b93528c311a',
+                              zone: '',
+                              isActive: false,
+                              latitude: 0,
+                              longitude: 0,
+                              unitsSold: 0,
+                              totalCustomers: 0,
+                              monthlySales: 0,
+                              recentActivities: [],
                             ),
                           );
-                        }).toList(),
-                        onChanged: (v) => setState(() => _selectedRep = v),
+                          return _InfoRow(
+                            label: 'المندوب المسؤول',
+                            value: salesperson.name,
+                            valueStyle: TextStyle(
+                              color: ColorManager.white,
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                    SizedBox(height: 12.h),
+                    const Divider(color: Colors.white12, height: 1),
+                    SizedBox(height: 12.h),
+                    Text(
+                      'ملاحظات المندوب:',
+                      style: TextStyle(
+                        color: ColorManager.grayColor,
+                        fontSize: 12.sp,
                       ),
                     ),
-                  ),
-                  if (_selectedRep != null) ...[
-                    SizedBox(height: 10.h),
-                    // Selected rep mini card
+                    SizedBox(height: 6.h),
                     Container(
-                      padding: EdgeInsets.all(10.w),
+                      width: double.infinity,
+                      padding: EdgeInsets.all(12.w),
                       decoration: BoxDecoration(
-                        color: ColorManager.availableColor.withValues(
-                          alpha: 0.08,
-                        ),
+                        color: Colors.white.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(10.r),
-                        border: Border.all(
-                          color: ColorManager.availableColor.withValues(
-                            alpha: 0.2,
-                          ),
-                        ),
+                        border: Border.all(color: Colors.white10),
                       ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.check_circle,
-                            color: Color(0xFF4CAF50),
-                            size: 16,
-                          ),
-                          SizedBox(width: 8.w),
-                          Text(
-                            'سيتم تعيين ${_selectedRep!.name}',
-                            style: TextStyle(
-                              color: ColorManager.white,
-                              fontSize: 12.sp,
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        widget.request.salespersonNotes ??
+                            'لا توجد ملاحظات من المندوب',
+                        style: TextStyle(
+                          color: ColorManager.white,
+                          fontSize: 13.sp,
+                          height: 1.4,
+                        ),
                       ),
                     ),
                   ],
-                ],
-              ),
-            ),
-
-            SizedBox(height: 24.h),
-
-            // ── Confirm Button ────────────────────────────────────────────────
-            SizedBox(
-              width: double.infinity,
-              height: 52.h,
-              child: ElevatedButton(
-                onPressed: _selectedRep == null || _isConfirming
-                    ? null
-                    : _onConfirm,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ColorManager.availableColor,
-                  disabledBackgroundColor: Colors.white10,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14.r),
-                  ),
-                  elevation: _selectedRep != null ? 4 : 0,
-                  shadowColor: ColorManager.availableColor.withValues(
-                    alpha: 0.4,
-                  ),
                 ),
-                child: _isConfirming
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.black,
-                        ),
-                      )
-                    : Text(
-                        'تأكيد التعيين',
-                        style: TextStyle(
-                          color: ColorManager.black,
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.bold,
+              ),
+            ] else ...[
+              // ── Assign Rep Card ───────────────────────────────────────────────
+              _SectionCard(
+                title: 'تعيين مندوب',
+                icon: Icons.assignment_ind_outlined,
+                iconColor: ColorManager.primaryColor,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'اختر مندوباً نشطاً لهذا الطلب',
+                      style: TextStyle(
+                        color: ColorManager.grayColor,
+                        fontSize: 11.sp,
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12.w,
+                        vertical: 4.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: ColorManager.darkGrayColor,
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(
+                          color: _selectedRep != null
+                              ? ColorManager.availableColor.withValues(
+                                  alpha: 0.5,
+                                )
+                              : Colors.white12,
                         ),
                       ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<SalesPerson>(
+                          value: _selectedRep,
+                          isExpanded: true,
+                          hint: Text(
+                            'اختر المندوب ...',
+                            style: TextStyle(
+                              color: ColorManager.grayColor,
+                              fontSize: 13.sp,
+                            ),
+                          ),
+                          dropdownColor: ColorManager.darkGrayColor,
+                          icon: Icon(
+                            Icons.keyboard_arrow_down,
+                            color: ColorManager.availableColor,
+                          ),
+                          items: _activeReps.map((rep) {
+                            return DropdownMenuItem<SalesPerson>(
+                              value: rep,
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 14.r,
+                                    backgroundImage: NetworkImage(
+                                      rep.avatarUrl,
+                                    ),
+                                  ),
+                                  SizedBox(width: 10.w),
+                                  Expanded(
+                                    child: Text(
+                                      '${rep.name} (${rep.zone})',
+                                      style: TextStyle(
+                                        color: ColorManager.white,
+                                        fontSize: 13.sp,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (v) => setState(() => _selectedRep = v),
+                        ),
+                      ),
+                    ),
+                    if (_selectedRep != null) ...[
+                      SizedBox(height: 10.h),
+                      // Selected rep mini card
+                      Container(
+                        padding: EdgeInsets.all(10.w),
+                        decoration: BoxDecoration(
+                          color: ColorManager.availableColor.withValues(
+                            alpha: 0.08,
+                          ),
+                          borderRadius: BorderRadius.circular(10.r),
+                          border: Border.all(
+                            color: ColorManager.availableColor.withValues(
+                              alpha: 0.2,
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.check_circle,
+                              color: Color(0xFF4CAF50),
+                              size: 16,
+                            ),
+                            SizedBox(width: 8.w),
+                            Text(
+                              'سيتم تعيين ${_selectedRep!.name}',
+                              style: TextStyle(
+                                color: ColorManager.white,
+                                fontSize: 12.sp,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ),
-            ),
+
+              SizedBox(height: 24.h),
+
+              // ── Confirm Button ────────────────────────────────────────────────
+              SizedBox(
+                width: double.infinity,
+                height: 52.h,
+                child: ElevatedButton(
+                  onPressed: _selectedRep == null || _isConfirming
+                      ? null
+                      : _onConfirm,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ColorManager.availableColor,
+                    disabledBackgroundColor: Colors.white10,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14.r),
+                    ),
+                    elevation: _selectedRep != null ? 4 : 0,
+                    shadowColor: ColorManager.availableColor.withValues(
+                      alpha: 0.4,
+                    ),
+                  ),
+                  child: _isConfirming
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.black,
+                          ),
+                        )
+                      : Text(
+                          'تأكيد التعيين',
+                          style: TextStyle(
+                            color: ColorManager.black,
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                ),
+              ),
+            ],
 
             SizedBox(height: 16.h),
           ],
@@ -299,14 +387,15 @@ class _RequestDetailViewState extends State<RequestDetailView> {
     await Future.delayed(const Duration(milliseconds: 600));
     if (!mounted) return;
 
-    // Update in-memory mock data
-    final index = LeadMockData.unitRequests.indexWhere((r) => r.id == widget.request.id);
+    final index = LeadMockData.unitRequests.indexWhere(
+      (r) => r.id == widget.request.id,
+    );
     if (index != -1) {
       LeadMockData.unitRequests[index] = widget.request.copyWith(
         assignedSalesPersonId: _selectedRep!.id,
+        status: 'assigned',
       );
     }
-
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(

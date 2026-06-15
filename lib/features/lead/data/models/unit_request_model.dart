@@ -11,6 +11,8 @@ class UnitRequest {
   final String paymentType;
   final DateTime requestDate;
   final String? assignedSalesPersonId;
+  final String status;
+  final String? salespersonNotes;
 
   const UnitRequest({
     required this.id,
@@ -25,6 +27,8 @@ class UnitRequest {
     required this.paymentType,
     required this.requestDate,
     this.assignedSalesPersonId,
+    this.status = 'pending',
+    this.salespersonNotes,
   });
 
   UnitRequest copyWith({
@@ -40,6 +44,8 @@ class UnitRequest {
     String? paymentType,
     DateTime? requestDate,
     String? assignedSalesPersonId,
+    String? status,
+    String? salespersonNotes,
   }) {
     return UnitRequest(
       id: id ?? this.id,
@@ -53,7 +59,10 @@ class UnitRequest {
       unitPrice: unitPrice ?? this.unitPrice,
       paymentType: paymentType ?? this.paymentType,
       requestDate: requestDate ?? this.requestDate,
-      assignedSalesPersonId: assignedSalesPersonId ?? this.assignedSalesPersonId,
+      assignedSalesPersonId:
+          assignedSalesPersonId ?? this.assignedSalesPersonId,
+      status: status ?? this.status,
+      salespersonNotes: salespersonNotes ?? this.salespersonNotes,
     );
   }
 }
